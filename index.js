@@ -7,6 +7,7 @@ const app = express();
 morgan.token('body', function (req, res) { return JSON.stringify(req.body); });
 
 app.use(cors());
+app.use(express.static('build'));
 app.use(express.json());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
@@ -95,15 +96,6 @@ app.post('/api/persons', (req, res) => {
   
 	persons = persons.concat(person);
 	res.json(person);
-
-	/*postlog(req, res, function (err) {
-		if (err) return done(err);
-	
-		// respond to request
-		res.setHeader('content-type', 'application/json');
-		res.end(JSON.stringify(person));
-
-	});*/
 });
 
 const PORT = process.env.PORT || 3003;
