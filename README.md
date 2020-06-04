@@ -1,2 +1,4 @@
 # phonebook
-The backend architecture of a simple phonebook web app
+A simple phonebook web app. Visit (here)[https://calcbook.herokuapp.com/]
+
+
