@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const Person = require('./models/person');
 
 const app = express();
 
@@ -56,7 +57,8 @@ app.get('/api/persons/:id', (req, res) => {
 	person ? res.json(person) : res.status(404).end();
 });
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', async (req, res) => {
+	const persons = await Person.find({});
 	res.json(persons);
 });
 
@@ -67,11 +69,7 @@ app.delete('/api/persons/:id', (req, res) => {
 	res.status(204).end();
 });
 
-const generateId = (min, max) => {
-	return Math.ceil(Math.random() * (max - min) + min);
-};
-
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', async (req, res) => {
 	const body = req.body;
   
 	if (!body.name || !body.number) {
@@ -80,22 +78,22 @@ app.post('/api/persons', (req, res) => {
 	  });
 	}
 
-	const foundPerson = persons.find(person => person.name === body.name);
+	/* const foundPerson = persons.find(person => person.name === body.name);
 
 	if (foundPerson) {
 		res.status(400).json({
 			error: 'name must be unique'
 		});
-	}
+	} */
   
-	const person = {
+	const person = new Person({
 	  name: body.name,
-	  number: body.number,
-	  id: generateId(1, 1000),
-	};
-  
-	persons = persons.concat(person);
-	res.json(person);
+	  number: body.number
+	});
+
+	const newPerson = await person.save();
+	
+	res.json(newPerson);
 });
 
 const PORT = process.env.PORT || 3003;
