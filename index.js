@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const Person = require('./models/person');
+const errorHandler = require('./middlewares/handleError');
 
 const app = express();
 
@@ -44,32 +45,51 @@ app.get('/', (req,res) => {
 	res.send(`<h1>Welcome to my Phonebook App</>`);
 });
 
-app.get('/info', (req,res) => {
-	const info = `<p>Phonebook has info for ${persons.length} people<p>
+app.get('/info', async (req,res) => {
+	try {
+		const persons = await Person.find({});
+		const info = `<p>Phonebook has info for ${persons.length} people<p>
 		<p>${new Date().toUTCString()}</p>`;
-	
-	res.send(info);
+		res.send(info);
+	} catch (error) {
+		next(error);
+	}
 });
 
-app.get('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id);
-	const person = persons.find(person => person.id === id);
-	person ? res.json(person) : res.status(404).end();
+app.get('/api/persons/:id', async (req, res, next) => {
+	try {
+		const person = await Person.findById(req.params.id);
+		if (person) {
+			res.json(person);
+		} else {
+			res.status(404).end();
+		}
+	} catch (error) {
+		next(error);
+	}
 });
 
-app.get('/api/persons', async (req, res) => {
-	const persons = await Person.find({});
-	res.json(persons);
+app.get('/api/persons', async (req, res, next) => {
+	try {
+		const persons = await Person.find({});
+		res.json(persons);
+	} catch (error) {
+		next(error);
+	}
+ });
+
+app.delete('/api/persons/:id', async (req, res, next) => {
+	try {
+		const deletedPerson = await Person.findByIdAndRemove(req.params.id);
+		if (deletedPerson) {
+			res.status(204).end();
+		}
+	} catch (error) {
+		next(error);
+	}
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-	const id = Number(req.params.id);
-	persons = persons.filter(person => person.id !== id);
-  
-	res.status(204).end();
-});
-
-app.post('/api/persons', async (req, res) => {
+app.post('/api/persons', async (req, res, next) => {
 	const body = req.body;
   
 	if (!body.name || !body.number) {
@@ -78,12 +98,21 @@ app.post('/api/persons', async (req, res) => {
 	  });
 	}
 
-	/* const foundPerson = persons.find(person => person.name === body.name);
-
+	/* const name = body.name;
+	const foundPerson = await Person.findOne({name});
+	console.log(foundPerson);
 	if (foundPerson) {
-		res.status(400).json({
-			error: 'name must be unique'
-		});
+		const person = {
+			name,
+			number: body.number
+		};
+	
+		try {
+			const updatedPerson = await Person.findByIdAndUpdate(foundPerson._id, person, { new: true });
+			res.json(updatedPerson);
+		} catch(error) {
+			next(error);
+		}
 	} */
   
 	const person = new Person({
@@ -91,10 +120,31 @@ app.post('/api/persons', async (req, res) => {
 	  number: body.number
 	});
 
-	const newPerson = await person.save();
-	
-	res.json(newPerson);
+	try {
+		const newPerson = await person.save();
+		res.json(newPerson);
+	} catch (error) {
+		next(error);
+	}
 });
+
+app.put('/api/persons/:id', async (req, res, next) => {
+	const body = await req.body;
+
+	const person = {
+		name: body.name,
+		number: body.number
+	}
+
+	try {
+		const updatedPerson = await Person.findByIdAndUpdate(req.params.id, person, { new: true });
+		res.json(updatedPerson);
+	} catch(error) {
+		next(error);
+	}
+})
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3003;
 

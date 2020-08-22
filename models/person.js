@@ -7,13 +7,20 @@ const url = process.env.CONNECTION_URL;
 
 console.log('connecting to', url);
 
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(result => {
-    console.log('connected to MongoDB');
-  })
-  .catch((error) => {
-    console.log('error connecting to MongoDB:', error.message);
-  });
+const mongoClient = async () => {
+	try {
+	  const connected = await mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
+	  if (connected) {
+		console.log('connected to MongoDB');
+	  }
+	} catch (error) {
+	  console.log('error connecting to MongoDB:', error.message);
+	}
+};
+  
+mongoClient();
+
+mongoose.set('useFindAndModify', false);
 
 const personSchema = new mongoose.Schema({
 name: String,

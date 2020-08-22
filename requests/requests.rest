@@ -1,4 +1,5 @@
-DELETE http://localhost:3003/api/persons/3 HTTP/1.1
+
+DELETE http://localhost:3003/api/persons/5f4069e7cc92a6e7f2df83cb HTTP/1.1
 
 ###
 
@@ -10,5 +11,14 @@ Content-Type: application/json
 
 {
     "name": "CR7",
-	"number": "094758950"
+	"number": "094759960"
+}
+
+###
+PUT http://localhost:3003/api/persons/5f3ffc5ef3cf40c84ab3794a HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "CR7",
+	"number": "094758960"
 }
