@@ -137,12 +137,12 @@ app.put('/api/persons/:id', async (req, res, next) => {
 	}
 
 	try {
-		const updatedPerson = await Person.findByIdAndUpdate(req.params.id, person, { new: true });
+		const updatedPerson = await Person.findByIdAndUpdate(req.params.id, person, { new: true, runValidators: true, context: 'query' });
 		res.json(updatedPerson);
 	} catch(error) {
 		next(error);
 	}
-})
+});
 
 app.use(errorHandler);
 
